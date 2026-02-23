@@ -138,6 +138,8 @@ export default {
       sidebarOpen: false,
       coverError: false,
       readPercent: -1,
+      restoreScroll: false,
+      scrollSaveTimer: null,
       theme: loadSetting('ebook_theme', 'light'),
       fontSize: parseInt(loadSetting('ebook_fontsize', '16'), 10),
       zoomLevel: parseInt(loadSetting('ebook_zoom', '100'), 10)
@@ -226,6 +228,7 @@ export default {
           var saved = loadSetting('ebook_progress_' + data.id, '0')
           var startCh = parseInt(saved, 10) || 0
           if (startCh >= data.chapters.length) startCh = 0
+          self.restoreScroll = true
           self.loadChapter(startCh)
         }
       })
@@ -272,12 +275,39 @@ export default {
       doc.open()
       doc.write(html)
       doc.close()
-      // Bind scroll for read percent
+      // Clear previous scroll poll
+      if (self._scrollPoll) { clearInterval(self._scrollPoll); self._scrollPoll = null }
       try {
         var win = iframe.contentWindow
-        win.onscroll = function () { self.updateReadPercent(win) }
-        // Initial percent
-        setTimeout(function () { self.updateReadPercent(win) }, 100)
+        // Poll scroll position every 500ms (works with sandbox, all engines)
+        self._scrollPoll = setInterval(function () {
+          self.updateReadPercent(win)
+          self.saveScrollPosition(win)
+        }, 500)
+        // Restore scroll position with polling
+        if (self.restoreScroll && self.book) {
+          var savedPos = parseInt(loadSetting('ebook_scroll_' + self.book.id, '0'), 10) || 0
+          self.restoreScroll = false
+          if (savedPos > 0) {
+            var attempts = 0
+            var restoreTimer = setInterval(function () {
+              attempts++
+              try {
+                var d = win.document
+                var de = d.documentElement
+                var bd = d.body
+                var sh = Math.max(bd.scrollHeight || 0, de.scrollHeight || 0)
+                var ch = de.clientHeight || bd.clientHeight || 0
+                if (sh > ch || attempts > 15) {
+                  clearInterval(restoreTimer)
+                  if (de) de.scrollTop = savedPos
+                  if (bd) bd.scrollTop = savedPos
+                  self.updateReadPercent(win)
+                }
+              } catch (e) { clearInterval(restoreTimer) }
+            }, 100)
+          }
+        }
       } catch (e) {}
     },
 
@@ -325,6 +355,22 @@ export default {
       } catch (e) {
         this.readPercent = -1
       }
+    },
+
+    saveScrollPosition: function (win) {
+      var self = this
+      if (!self.book) return
+      if (self.scrollSaveTimer) return
+      self.scrollSaveTimer = setTimeout(function () {
+        self.scrollSaveTimer = null
+        try {
+          var doc = win.document
+          var de = doc.documentElement
+          var body = doc.body
+          var scrollTop = (de && de.scrollTop) || body.scrollTop || 0
+          saveSetting('ebook_scroll_' + self.book.id, String(scrollTop))
+        } catch (e) {}
+      }, 500)
     },
 
     // TOC auto scroll
