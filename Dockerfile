@@ -6,7 +6,7 @@ RUN npm install
 COPY frontend/ ./
 RUN npm run build
 
-FROM docker.io/library/golang:1.23-alpine AS backend
+FROM docker.io/library/golang:1.24-alpine AS backend
 WORKDIR /build
 COPY go.mod go.sum ./
 RUN go mod download
