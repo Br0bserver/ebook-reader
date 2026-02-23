@@ -9,7 +9,7 @@ backend:
 	CGO_ENABLED=0 go build -ldflags="-s -w" -o ebook-reader ./cmd/server/
 
 docker:
-	podman build -t ebook-reader .
+	docker build -t ebook-reader .
 
 clean:
 	rm -rf static/dist/* ebook-reader data/
