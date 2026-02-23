@@ -18,5 +18,6 @@ RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /ebook-reader ./cmd/server/
 FROM scratch
 COPY --from=backend /ebook-reader /ebook-reader
 COPY --from=backend /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+ENV PORT=8080
 EXPOSE 8080
 ENTRYPOINT ["/ebook-reader"]

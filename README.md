@@ -24,9 +24,11 @@
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
-| `-p` | 8080 | 监听端口 |
+| `-p` | 8080 | 监听端口（也可通过环境变量 `PORT` 设置） |
 | `-d` | data | 缓存目录 |
 | `-ttl` | 24h | 缓存过期时间 |
+
+优先级：命令行参数 > 环境变量 > 默认值
 
 ## 构建
 
@@ -56,6 +58,12 @@ make build
 # 构建镜像（node 编译前端 -> go 编译后端 -> scratch 最终镜像）
 make docker
 
-# 运行
-docker run -p 8080:8080 ebook-reader
+# 运行（外部 3000 -> 容器内 8080）
+docker run -p 3000:8080 ebook-reader
+
+# 通过环境变量修改容器内端口
+docker run -p 3000:3000 -e PORT=3000 ebook-reader
+
+# 通过命令行参数修改容器内端口
+docker run -p 3000:3000 ebook-reader -p 3000
 ```

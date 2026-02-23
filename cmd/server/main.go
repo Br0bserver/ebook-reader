@@ -10,13 +10,23 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"ebook-reader/static"
 )
 
+func envInt(key string, fallback int) int {
+	if v := os.Getenv(key); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
+	}
+	return fallback
+}
+
 func main() {
-	port := flag.Int("p", 8080, "listen port")
+	port := flag.Int("p", envInt("PORT", 8080), "listen port (env: PORT)")
 	dataDir := flag.String("d", "data", "data directory for cache")
 	ttl := flag.Duration("ttl", 24*time.Hour, "cache TTL duration")
 	flag.Parse()
