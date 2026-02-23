@@ -58,12 +58,12 @@ make build
 # 构建镜像（node 编译前端 -> go 编译后端 -> scratch 最终镜像）
 make docker
 
-# 运行（外部 3000 -> 容器内 8080）
-docker run -p 3000:8080 ebook-reader
+# 运行（外部 3000 -> 容器内 8080，后台运行）
+docker run -d -p 3000:8080 ebook-reader
 
 # 通过环境变量修改容器内端口
-docker run -p 3000:3000 -e PORT=3000 ebook-reader
+docker run -d -p 3000:3000 -e PORT=3000 ebook-reader
 
 # 通过命令行参数修改容器内端口
-docker run -p 3000:3000 ebook-reader -p 3000
+docker run -d -p 3000:3000 ebook-reader -p 3000
 ```

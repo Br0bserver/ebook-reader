@@ -59,7 +59,7 @@
           <h2 class="welcome-title">eBook Reader</h2>
           <p class="welcome-desc">Pass <code>?file=URL</code> to open a book.</p>
           <div class="welcome-example">
-            <code>http://localhost:8080/?file=https://example.com/book.epub</code>
+            <code>?file=https://example.com/book.epub</code>
           </div>
           <p class="welcome-formats">Supported: EPUB, TXT</p>
         </div>
